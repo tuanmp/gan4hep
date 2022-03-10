@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 *npz
+generator
+log_training
+notebooks

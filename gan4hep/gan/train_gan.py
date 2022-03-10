@@ -15,6 +15,7 @@ from gan4hep.utils_gan import generate_and_save_images
 from gan4hep.preprocess import herwig_angles
 from gan4hep.preprocess import herwig_angles2
 from gan4hep.preprocess import dimuon_inclusive
+from gan4hep.preprocess import geant4_leading_products
 
 def inference(gan, test_in, test_truth, log_dir):
     checkpoint_dir = os.path.join(log_dir, "checkpoints")
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     add_arg("--batch-size", help='Batch size', type=int, default=512)
     add_arg("--lr", help='learning rate', type=float, default=0.0001)
     add_arg("--data", default='herwig_angles',
-        choices=['herwig_angles', 'dimuon_inclusive', 'herwig_angles2'])
+        choices=['herwig_angles', 'dimuon_inclusive', 'herwig_angles2', 'geant4_leading_products'])
 
     # model parameters
     add_arg("--noise-dim", type=int, default=4, help="noise dimension")
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 
     # prepare input data by calling those function implemented in 
     # gan4hep.preprocess.
-    train_in, train_truth, test_in, test_truth, _ = eval(args.data)(
+    train_in, train_truth, test_in, test_truth, labels = eval(args.data)(
         args.filename, max_evts=args.max_evts)
 
     batch_size = args.batch_size
@@ -85,4 +86,4 @@ if __name__ == '__main__':
             train_truth, args.epochs, batch_size,
             test_truth, args.log_dir,
             generate_and_save_images,
-            train_in, test_in)
+            train_in, test_in, labels)

@@ -102,7 +102,7 @@ class GAN():
 
 
     def train(self, train_truth, epochs, batch_size, test_truth, log_dir, evaluate_samples_fn,
-        train_in=None, test_in=None):
+        train_in=None, test_in=None, labels=None):
         # ======================================
         # construct testing data once for all
         # ======================================
@@ -173,7 +173,7 @@ class GAN():
 
                 tot_wdis = evaluate_samples_fn(
                     self.generator, epoch, testing_data,
-                    summary_writer, img_dir, **loss_dict)
+                    summary_writer, img_dir, **loss_dict, labels=labels)
 
                 if tot_wdis < best_wdis:
                     ckpt_manager.save()

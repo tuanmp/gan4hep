@@ -188,3 +188,42 @@ def dimuon_inclusive(filename, max_evts=None, testing_frac=0.1):
               ['subleading Muon {}'.format(name) for name in ['pT', 'eta', 'phi']]
     
     return (None, train_truth, None, test_truth, xlabels)
+
+def geant4_leading_products(filename, testing_frac=0.1, train_particle_type=False, max_evts=None):
+    df = read_dataframe(filename, sep=' ')
+    data = df.to_numpy()
+    
+    data = data.reshape((data.shape[0], -1, 5))
+
+    n_particles = data.shape[1]
+
+    # from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
+    # encoder = OneHotEncoder(sparse=False)
+    # energy_scaler = MinMaxScaler()
+    momentum_scaler = MinMaxScaler(feature_range=(-1,1))
+    scaler = MinMaxScaler(feature_range=(-1,1))
+
+    if not train_particle_type:
+        data=data[:,:, 1:]
+        # energy = data[:,:,0]
+        # energy /= np.max(energy)
+        # momentum = data[:,:,1:]
+        # momentum = momentum.reshape((momentum.shape[0], -1))
+        # momentum = momentum_scaler.fit_transform(momentum).reshape((momentum.shape[0], 3, -1))
+
+    data = data.reshape((data.shape[0], -1))
+    scaled_data = scaler.fit_transform(data).reshape(data.shape[0], n_particles, -1)        
+
+    # scaled_data = np.concatenate((energy[...,np.newaxis], momentum), axis=-1)
+    scaled_input = scaled_data[:, 0]
+    scaled_truth = scaled_data[:, 1:]
+    scaled_truth = scaled_truth.reshape((scaled_truth.shape[0], -1))
+
+    cutoff = int(data.shape[0] * testing_frac)
+
+    train_input, test_input = scaled_input[cutoff:], scaled_input[:cutoff]
+    train_truth, test_truth = scaled_truth[cutoff:], scaled_truth[:cutoff]
+
+    xlabels = [ "leading_" + i for i in ['E', 'px', 'py', 'pz'] ] + [ "subleading_" + i for i in ['E', 'px', 'py', 'pz'] ]
+
+    return train_input, train_truth, test_input, test_truth, xlabels
