@@ -132,3 +132,5 @@ dmypy.json
 generator
 log_training
 notebooks
+*log*
+slurm*

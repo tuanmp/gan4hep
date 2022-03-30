@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH -A m3443_g
+#SBATCH -C gpu
+#SBATCH -q regular
+#SBATCH -t 80
+#SBATCH -N 2
+#SBATCH --ntasks-per-node=3
+#SBATCH -c 40
+#SBATCH --gpus-per-task=1
+
+export SLURM_CPU_BIND="cores"
+script=gan4hep/gan/train_my_gan.py 
+config=/global/homes/p/pmtuan/gan4hep/train_log_1e5_events_COM_pT_Eta_deltaPhi_M/config.json
+
+srun python $script --config $config 

@@ -23,7 +23,9 @@ class GAN():
         self.gen_input_dim = self.noise_dim + self.cond_dim
 
         # Build the critic
-        self.discriminator = self.build_critic()
+        self.discriminator = self.build_critic(
+            dense_layers=kwargs.get("disc_dense_layers", [256,256]),
+            dropout_rate=kwargs.get('disc_dropout'))
         self.discriminator.summary()
 
         # Build the generator
@@ -33,20 +35,6 @@ class GAN():
 
     def build_generator(self):
         gen_input_dim = self.gen_input_dim
-
-        # layer_size = 256
-        # num_layers = 10
-        # layer_list = [keras.Input(shape=(gen_input_dim,))]
-        # for _ in range(num_layers):
-        #     layer_list += [
-        #         layers.Dense(layer_size),
-        #         layers.LayerNormalization(),
-        #         layers.Activation("tanh")
-        #     ]
-        # layer_list += [layers.Dense(self.gen_output_dim), layers.Activation("tanh")]
-        # model = keras.Sequential(layer_list, name='Generator')
-
-        # BatchNormalization vs LayerNormalization
         model = keras.Sequential([
             keras.Input(shape=(gen_input_dim,)),
             layers.Dense(256),
@@ -55,39 +43,27 @@ class GAN():
             
             layers.Dense(256),
             layers.BatchNormalization(),
+            layers.LeakyReLU(),
             
             layers.Dense(self.gen_output_dim),
             layers.Activation("tanh"),
         ], name='Generator')
         return model
 
-    def build_critic(self):
+    def build_critic(self, dropout_rate=0., dense_layers=[256, 256]):
         gen_output_dim = self.gen_output_dim
+        cond_dim = self.cond_dim
 
-        # layer_size = 512
-        # num_layers = 10
-        # layer_list = [keras.Input(shape=(gen_output_dim,))]
-        # for _ in range(num_layers):
-        #     layer_list += [
-        #         layers.Dense(layer_size),
-        #         layers.LayerNormalization(),
-        #         layers.LeakyReLU(),
-        #     ]
-        # layer_list += [layers.Dense(1, activation='sigmoid')]
-        # model = keras.Sequential(layer_list, name='Discriminator')
-
-        model = keras.Sequential([
-            keras.Input(shape=(gen_output_dim,)),
-            layers.Dense(256),
-            layers.BatchNormalization(),
-            layers.LeakyReLU(),
-            
-            layers.Dense(256),
-            layers.BatchNormalization(),
-            layers.LeakyReLU(),
-
-            layers.Dense(1, activation='sigmoid'),
-        ], name='Discriminator')
+        model = keras.Sequential(
+            name='Discriminator'
+        )
+        model.add(keras.Input(shape=(gen_output_dim + cond_dim,)))
+        for dense_layer in dense_layers:
+            model.add(layers.Dense(dense_layer))
+            model.add(layers.Dropout(dropout_rate, seed=0))
+            model.add(layers.BatchNormalization())
+            model.add(layers.LeakyReLU())
+        model.add(layers.Dense(1, activation='sigmoid'))
         return model
 
 

@@ -103,5 +103,6 @@ def compare(predictions, truths, outname, xlabels,
         ax.set_ylim(0, max_y)
         ax.legend()
 
-    plt.savefig(outname)
+    if outname is not None:
+        plt.savefig(outname)
     plt.close('all')

@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH -A m3443
+#SBATCH -C gpu
+#SBATCH -q regular
+#SBATCH -t 90
+#SBATCH -n 6
+#SBATCH --ntasks-per-node=3
+#SBATCH -c 10
+#SBATCH --gpus-per-task=1
+#SBATCH --gpu-bind=map_gpu:0,1,2,3,4,5
+
+export SLURM_CPU_BIND="cores"
+srun sh run_batch_job.sh
